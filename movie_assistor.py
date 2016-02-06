@@ -74,8 +74,9 @@ def walk_dir():
 
 #finally calling and displaying for testing purpose
 def func_call():
-    input_directory()
-	#print(dir_path)
+    n = input_directory()
+    while n == 999:
+        n=input_directory()
     walk_dir()
 
     for name in movie_names:
@@ -133,10 +134,12 @@ def saveToSpreadSheet():
 	sheet['E1']="Rotten Tomato"
 	sheet['F1']="Runtime"
 	sheet['G1']="Actors"
-	sheet['H1']="Director"
-	sheet['I1']="Plot"
+	sheet['H1']="Plot"
+	sheet['I1']="Director"
 	k=2
-	for info in movie_info:
+
+	movie_sorted = sorted(movie_info,key=lambda x:x["imdbRating"],reverse=True)
+	for info in movie_sorted:
 		if info['Title'] == 'N/A':
 			continue
 		sheet.cell(row=k,column=1).value = str(info["Title"])
@@ -146,8 +149,8 @@ def saveToSpreadSheet():
 		sheet.cell(row=k,column=5).value = str(info["tomatoRating"])
 		sheet.cell(row=k,column=6).value = str(info["Runtime"])
 		sheet.cell(row=k,column=7).value = str(info["Actors"])
-		sheet.cell(row=k,column=8).value = str(info["Director"])
-		sheet.cell(row=k,column=9).value = str(info["Plot"])
+		sheet.cell(row=k,column=8).value = str(info["Plot"])
+		sheet.cell(row=k,column=9).value = str(info["Director"])
 		k=k+1
 	wb.save("My Movie Database.xlsx")
 	time.sleep(2)
