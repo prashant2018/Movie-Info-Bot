@@ -7,12 +7,11 @@ li_show=["Title","Plot","Year","imdbRating","tomatoMeter"]
 
 def search(movie):
     url = "http://www.omdbapi.com/?"
-
+    print("Getting info of "+movie)
     try:
         r = requests.post(url,params={"tomatoes":"true","t":movie})
     except:
         print("Network Error !")
-        search(movie)
         return 0
 
     jformat =json.loads(r.text)

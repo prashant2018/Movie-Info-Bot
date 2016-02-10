@@ -1,13 +1,15 @@
 # Movie Assistor - This script scans the directory for movies and returns the ratings and riviews in a spreadsheet.
+
 import os
 import guessit
 import threading
 import pyperclip
 import sys
 import time
+import pprint
 import getInfo
-import openpyxl
 import subprocess
+import openpyxl
 from openpyxl.styles import	Font,Style
 # List of all possible video formats
 name_list = ["webm","mkv","flv","vob","ogv","ogg","drc","gif","gifv","mng","avi","moc","qt","wmv","yuv","rm","rmvb","asf",
@@ -16,8 +18,10 @@ name_list = ["webm","mkv","flv","vob","ogv","ogg","drc","gif","gifv","mng","avi"
 #list will contain movie name_list
 movie_names = []
 
+f_list = []
+
 #list will contain movie information
-movie_info = []
+movie_info = ["","","","","","","",""]
 
 # path of directory is stored here
 dir_path = ""
@@ -28,9 +32,9 @@ def input_directory():
 	if len(sys.argv) == 1:
 		print("Copy folder's path and paste here : ")
 		dir_path = input()
+		#dir_path = "/home/kiit/movies"
 	else:
 		dir_path = pyperclip.paste()
-
 
 	if os.path.exists(dir_path):
 		os.chdir(dir_path)
@@ -70,28 +74,49 @@ def walk_dir():
 			title = movie_title(filename)
 			if title != "":
 				movie_names.append(title)
-	#movie_names=list(set(movie_names))
 
 #finally calling and displaying for testing purpose
 def func_call():
-    n = input_directory()
-    while n == 999:
-        n=input_directory()
+    input_directory()
     walk_dir()
+    #print(len(movie_names)
+    download_review()
 
-    for name in movie_names:
-        print("Getting Info of "+name+"...")
-        downFile(name)
+def thread_download(num):
+	#download information
+	temp_list = list()
+	temp = num
+	while True:
+		try:
+			check = getInfo.getInfo(movie_names[num])
+			temp_list.append(check)
+			if check == "":
+				movie_info[temp] = temp_list
+						
+				return movie_info[temp]
+			else:
+				num = num + 8
+		except:
+			movie_info[temp] = temp_list
+			return movie_info[temp]
 
+
+def download_review():
+	thread_list = list()
+	for i in range(0,8):
+		temp_thread = threading.Thread(target = thread_download, args=[i])
+		thread_list.append(temp_thread)
+		temp_thread.start()
+	for threadObj in thread_list:
+		threadObj.join()
+	
+	
 
 def display():
-	for i in movie_info:
-		print(i)
-
-def downFile(mname):
-    x=getInfo.getInfo(mname)
-    #print(x)
-    movie_info.append(x)
+	
+	for i in f_list:
+		pprint.pprint(i)
+		
 
 def saveToSpreadSheet():
 	print("Writing to spreadsheet....")
@@ -107,9 +132,7 @@ def saveToSpreadSheet():
 	sheet['G1'].font = Font(size=12,bold=True)
 	sheet['H1'].font = Font(size=12,bold=True)
 	sheet['I1'].font = Font(size=12,bold=True)
-	#italic = openpyxl.styles.Font(size=28,bold=True)
-	#styleobj= openpyxl.styles.Style(font=italic24font)
-	#sheet['A'].style/styleobj
+	
 	sheet.column_dimensions['A'].width = 22
 	sheet.column_dimensions['C'].width = 12
 	sheet.column_dimensions['D'].width = 15
@@ -117,15 +140,6 @@ def saveToSpreadSheet():
 	sheet.column_dimensions['G'].width = 30
 	sheet.column_dimensions['H'].width = 30
 	sheet.column_dimensions['I'].width = 70
-	#sheet.freeze_panes='A1'
-	#sheet.freeze_panes='B1'
-	#sheet.freeze_panes='C1'
-	#sheet.freeze_panes='D1'
-	#sheet.freeze_panes='E1'
-	#sheet.freeze_panes='F1'
-	#sheet.freeze_panes='G1'
-	#sheet.freeze_panes='H1'
-	#sheet.freeze_panes='I1'
 
 	sheet['A1']="Title"
 	sheet['B1']="Year"
@@ -137,9 +151,11 @@ def saveToSpreadSheet():
 	sheet['H1']="Plot"
 	sheet['I1']="Director"
 	k=2
-
-	movie_sorted = sorted(movie_info,key=lambda x:x["imdbRating"],reverse=True)
-	for info in movie_sorted:
+	f_list=movie_info[0]+movie_info[1]+movie_info[2]+movie_info[3]+movie_info[4]+movie_info[5]+movie_info[6]+movie_info[7]
+	movie_sorted = sorted(f_list,key=lambda x:x["imdbRating"],reverse=True)
+	print(f_list)	
+	for info in f_list:
+		print(info)
 		if info['Title'] == 'N/A':
 			continue
 		sheet.cell(row=k,column=1).value = str(info["Title"])
@@ -159,5 +175,6 @@ def openFile():
 	subprocess.Popen(['see','My Movie Database.xlsx'])
 
 func_call()
+#display()
 saveToSpreadSheet()
 openFile()
