@@ -10,7 +10,7 @@ import pprint
 import getInfo
 import subprocess
 import openpyxl
-from openpyxl.styles import	Font,Style
+from openpyxl.styles import Font
 # List of all possible video formats
 name_list = ["webm","mkv","flv","vob","ogv","ogg","drc","gif","gifv","mng","avi","moc","qt","wmv","yuv","rm","rmvb","asf",
 			 "mp4","m4p","m4v","mpg","mp2","mpe","mpeg","m2v","svi","3gp","3g2","mxf","roq","nsv","f4p","f4a","f4b"]
@@ -153,9 +153,9 @@ def saveToSpreadSheet():
 	k=2
 	f_list=movie_info[0]+movie_info[1]+movie_info[2]+movie_info[3]+movie_info[4]+movie_info[5]+movie_info[6]+movie_info[7]
 	movie_sorted = sorted(f_list,key=lambda x:x["imdbRating"],reverse=True)
-	print(f_list)	
+	#print(f_list)	
 	for info in f_list:
-		print(info)
+		#print(info)
 		if info['Title'] == 'N/A':
 			continue
 		sheet.cell(row=k,column=1).value = str(info["Title"])
